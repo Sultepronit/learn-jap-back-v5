@@ -17,7 +17,7 @@ require_once 'httpCrud.php';
 // echo '</pre>';
 
 $router = [
-    '/jap' => ['httpCrud', 'jap2'],
+    '/jap' => ['httpCrud', 'jap_words'],
 ];
 
 try {

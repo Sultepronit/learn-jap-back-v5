@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once 'renumberAfterDelete.php';
+
 function httpCrud($table) {
     function receiveInput() {
         $json = file_get_contents('php://input');
@@ -8,7 +10,6 @@ function httpCrud($table) {
     }
 
     function get(PDO $pdo, string $table) {
-        receiveInput();
         $data = $pdo
             ->query("SELECT * FROM {$table};")
             ->fetchAll(PDO::FETCH_ASSOC);
@@ -16,12 +17,21 @@ function httpCrud($table) {
         echo json_encode($data);
     }
 
+    function post(PDO $pdo, string $table) {
+        $cn = receiveInput()['cardNumber'];
+        $pdo->exec("INSERT INTO {$table} (cardNumber) VALUES ({$cn})");
+
+        $id = (int) $pdo->lastInsertId();
+        $newCard = $pdo
+            ->query("SELECT * FROM {$table} WHERE id = {$id}")
+            ->fetch(PDO::FETCH_ASSOC);
+
+        echo json_encode($newCard);
+    }
+
     function patch(PDO $pdo, string $table) {
         $id = $_GET['id'] ?? null;
         $input = receiveInput();
-
-        // echo $id, PHP_EOL;
-        // print_r($input);
 
         $columns = array_keys($input);
         $values = array_values($input);
@@ -32,38 +42,33 @@ function httpCrud($table) {
         $stmt = $pdo->prepare($query);
         $stmt->execute($values);
 
-        // echo $query . PHP_EOL;
-
         $colStting = implode(', ', $columns);
         $query = "SELECT {$colStting} FROM {$table} WHERE id = {$id}";
         $updated = $pdo->query($query)->fetch(PDO::FETCH_ASSOC);
         
-        // echo $query . PHP_EOL;
-        // print_r($updated);
-        // echo json_encode($input), json_encode($updated), PHP_EOL;
-        // echo json_encode($input) == json_encode($updated), PHP_EOL;
         if(json_encode($input) == json_encode($updated)) {
             echo '{"success": true}';
         }
     }
 
-    function post(PDO $pdo, string $table) {
-        // $id = $_GET['id'] ?? null;
-        // echo $id, PHP_EOL;
-        // $input = receiveInput();
-        // print_r($input);
-        // echo 'posting...' . PHP_EOL;
-        $pdo->exec("INSERT INTO {$table} (status) VALUES (-1)");
+    function delete(PDO $pdo, string $table) {
+        $id = $_GET['id'] ?? null;
+        try {
+            $pdo->beginTransaction();
 
-        $id = (int) $pdo->lastInsertId();
-        $newCard = $pdo
-            ->query("SELECT * FROM {$table} WHERE id = {$id}")
-            ->fetch(PDO::FETCH_ASSOC);
+            $pdo->exec("DELETE FROM {$table} WHERE id = {$id}");
+            renumberAfterDelete($pdo, $table);
 
-        echo json_encode($newCard);
+            $pdo->commit();
+
+            echo '{"success": true}';
+        } catch (\Throwable $e) {
+            if($pdo->inTransaction()) {
+                $pdo->rollBack();
+                print_r($e);
+            }
+        }
     }
-
-    // function options() {} # for the OPTIONS method
 
     try {
         $pdo = newPDO();
