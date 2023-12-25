@@ -48,11 +48,19 @@ function httpCrud($table) {
     }
 
     function post(PDO $pdo, string $table) {
-        $id = $_GET['id'] ?? null;
-        echo 'we did it!' . PHP_EOL;
-        echo $id, PHP_EOL;
-        $input = receiveInput();
-        print_r($input);
+        // $id = $_GET['id'] ?? null;
+        // echo $id, PHP_EOL;
+        // $input = receiveInput();
+        // print_r($input);
+        // echo 'posting...' . PHP_EOL;
+        $pdo->exec("INSERT INTO {$table} (status) VALUES (-1)");
+
+        $id = (int) $pdo->lastInsertId();
+        $newCard = $pdo
+            ->query("SELECT * FROM {$table} WHERE id = {$id}")
+            ->fetch(PDO::FETCH_ASSOC);
+
+        echo json_encode($newCard);
     }
 
     // function options() {} # for the OPTIONS method
