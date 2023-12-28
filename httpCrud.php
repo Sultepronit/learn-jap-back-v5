@@ -48,6 +48,8 @@ function httpCrud($table) {
         
         if(json_encode($input) == json_encode($updated)) {
             echo '{"success": true}';
+        } else {
+            echo json_encode($input), json_encode($updated);
         }
     }
 
