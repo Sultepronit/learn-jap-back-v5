@@ -8,9 +8,10 @@ header('Access-Control-Allow-Origin: *');
 // header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json');
 
-require_once 'newPDO.php';
+// require_once 'newPDO.php';
+require_once 'usePDO.php';
 require_once 'httpCrud.php';
-// require_once 'japSession.php';
+require_once 'japSession.php';
 
 // echo '<pre>';
 // print_r($_SERVER);
@@ -18,6 +19,7 @@ require_once 'httpCrud.php';
 
 $router = [
     '/jap' => ['httpCrud', 'jap_words'],
+    '/jap_session' => ['japSession']
 ];
 
 try {
@@ -33,8 +35,6 @@ try {
 
     call_user_func(...$controller);
 } catch (\Throwable $th) {
-    http_response_code(404);
-    echo '<pre>';
+    http_response_code(500);
     print_r($th);
-    echo '</pre>';
 } 

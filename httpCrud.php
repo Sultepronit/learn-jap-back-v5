@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once 'renumberAfterDelete.php';
+// require_once 'usePDO.php';
 
 function httpCrud($table) {
     function receiveInput() {
@@ -67,25 +68,28 @@ function httpCrud($table) {
         } catch (\Throwable $e) {
             if($pdo->inTransaction()) {
                 $pdo->rollBack();
-                print_r($e);
             }
+            http_response_code(500);
+            print_r($e);
+            exit();
         }
     }
 
-    try {
-        $pdo = newPDO();
-        $action = $_GET['real-method']
-            ?? strtolower($_SERVER['REQUEST_METHOD']);
-        call_user_func_array($action, [$pdo, $table]);  
-    } catch (\Throwable $th) {
-        http_response_code(404);
+    $action = $_GET['real-method']
+        ?? strtolower($_SERVER['REQUEST_METHOD']);
+    usePDO($action, [$table]);
 
-        echo '<pre>';
-        print_r($th);
-        echo '</pre>';
-
-        exit();
-    } finally {
-        $pdo = null;
-    }
+    // try {
+    //     // $pdo = newPDO();
+    //     $action = $_GET['real-method']
+    //         ?? strtolower($_SERVER['REQUEST_METHOD']);
+    //     // call_user_func_array($action, [$pdo, $table]); 
+    //     usePDO($action, [$table]);
+    // } catch (\Throwable $th) {
+    //     http_response_code(500);
+    //     print_r($th);
+    //     exit();
+    // } finally {
+    //     // $pdo = null;
+    // }
 }
