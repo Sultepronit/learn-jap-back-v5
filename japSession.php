@@ -10,32 +10,32 @@ function japSession() {
         $constsAndVars = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
         # learn list
-        $query = 'SELECT * FROM jap2 WHERE status = 0;';
+        $query = 'SELECT * FROM jap_words WHERE learnStatus = 0;';
         $stmt = $pdo->query($query);
         $learnList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         # confirm list
-        $query = 'SELECT * FROM jap2 WHERE status = 1;';
+        $query = 'SELECT * FROM jap_words WHERE learnStatus = 1;';
         $stmt = $pdo->query($query);
         $confirmList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         # repeat list
-        $query = "SELECT * FROM jap2
-            WHERE status BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}
+        $query = "SELECT * FROM jap_words
+            WHERE learnStatus BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}
             AND fProgress >= 0 AND bProgress >= 0;";
         $stmt = $pdo->query($query);
         $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         # repeat-problem list
-        $query = "SELECT * FROM jap2
-            WHERE status BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}
+        $query = "SELECT * FROM jap_words
+            WHERE learnStatus BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}
             AND (fProgress < 0 OR bProgress < 0);";
         $stmt = $pdo->query($query);
         $problemList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         # recognize list
-        $query = "SELECT * FROM jap2
-            WHERE STATUS > {$constsAndVars['reRepeatStatus']}
+        $query = "SELECT * FROM jap_words
+            WHERE learnStatus > {$constsAndVars['reRepeatStatus']}
             AND fStats < 1";
         $stmt = $pdo->query($query);
         $recognizeList = $stmt->fetchAll(PDO::FETCH_ASSOC);
