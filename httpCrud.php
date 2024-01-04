@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once 'renumberAfterDelete.php';
+require_once 'addNextRepeatStatus.php';
 // require_once 'usePDO.php';
 
 function httpCrud($table) {
@@ -33,18 +34,28 @@ function httpCrud($table) {
     function patch(PDO $pdo, string $table) {
         $id = $_GET['id'] ?? null;
         $input = receiveInput();
+        
+        if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
+            $input['learnStatus'] = addNextRepeatStatus($pdo, $table);
+        }
+        // print_r($input);
+        // print_r($input['learnStatus']);
 
         $columns = array_keys($input);
         $values = array_values($input);
-        $values[] = $id;
+        $values[] = (int)$id;
 
-        $set = implode(' = ? ', $columns) . ' = ?';
+        $set = implode(' = ?, ', $columns) . ' = ?';
+        // echo $id . PHP_EOL;
+        // echo $set . PHP_EOL;
+        // var_dump($values);
         $query = "UPDATE {$table} SET {$set} WHERE id = ?";
         $stmt = $pdo->prepare($query);
+        // print_r($stmt);
         $stmt->execute($values);
 
-        $colStting = implode(', ', $columns);
-        $query = "SELECT {$colStting} FROM {$table} WHERE id = {$id}";
+        $colString = implode(', ', $columns);
+        $query = "SELECT {$colString} FROM {$table} WHERE id = {$id}";
         $updated = $pdo->query($query)->fetch(PDO::FETCH_ASSOC);
         
         if(json_encode($input) == json_encode($updated)) {
