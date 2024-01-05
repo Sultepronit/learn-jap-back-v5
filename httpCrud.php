@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 require_once 'renumberAfterDelete.php';
 require_once 'addNextRepeatStatus.php';
-// require_once 'usePDO.php';
 
 function httpCrud($table) {
     function receiveInput() {
@@ -38,20 +37,14 @@ function httpCrud($table) {
         if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
             $input['learnStatus'] = addNextRepeatStatus($pdo, $table);
         }
-        // print_r($input);
-        // print_r($input['learnStatus']);
 
         $columns = array_keys($input);
         $values = array_values($input);
         $values[] = (int)$id;
 
         $set = implode(' = ?, ', $columns) . ' = ?';
-        // echo $id . PHP_EOL;
-        // echo $set . PHP_EOL;
-        // var_dump($values);
         $query = "UPDATE {$table} SET {$set} WHERE id = ?";
         $stmt = $pdo->prepare($query);
-        // print_r($stmt);
         $stmt->execute($values);
 
         $colString = implode(', ', $columns);
@@ -86,21 +79,7 @@ function httpCrud($table) {
         }
     }
 
-    $action = $_GET['real-method']
+    $method = $_GET['real-method']
         ?? strtolower($_SERVER['REQUEST_METHOD']);
-    usePDO($action, [$table]);
-
-    // try {
-    //     // $pdo = newPDO();
-    //     $action = $_GET['real-method']
-    //         ?? strtolower($_SERVER['REQUEST_METHOD']);
-    //     // call_user_func_array($action, [$pdo, $table]); 
-    //     usePDO($action, [$table]);
-    // } catch (\Throwable $th) {
-    //     http_response_code(500);
-    //     print_r($th);
-    //     exit();
-    // } finally {
-    //     // $pdo = null;
-    // }
+    usePDO($method, [$table]);
 }

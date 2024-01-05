@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function usePDO(callable $action, array $args) {
+function usePDO(callable $action, array $args = []) {
     require_once '../env.php';
     try {
         $pdo = new PDO(
@@ -14,7 +14,7 @@ function usePDO(callable $action, array $args) {
     } catch (\Throwable $th) {
         http_response_code(500);
         print_r($th);
-        exit();
+        // exit();
     } finally {
         $pdo = null;
     }
