@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once 'updateReRepeatStatus.php';
+
 function japSession(PDO $pdo) {
     # session consts and vars
     $query = 'SELECT * FROM jap_words_const_vars;';
@@ -23,6 +25,7 @@ function japSession(PDO $pdo) {
         AND fProgress >= 0 AND bProgress >= 0;";
     $stmt = $pdo->query($query);
     $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    updateReRepeatStatus($pdo, $constsAndVars, count($repeatList));
 
     # repeat-problem list
     $query = "SELECT * FROM jap_words
