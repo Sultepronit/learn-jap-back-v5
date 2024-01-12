@@ -2,19 +2,25 @@
 declare(strict_types=1);
 
 header('Access-Control-Allow-Origin: *');
-// header('Access-Control-Allow-Origin: http://localhost:5173');
-header('Content-Type: application/json');
+// print_r($_SERVER);
 
+require_once '../allowedOrigins.php';
 require_once 'usePDO.php';
 require_once 'httpCrud.php';
 require_once 'japSession.php';
 
-// echo '<pre>';
-// print_r($_SERVER);
-// echo '</pre>';
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if(!in_array($origin, $alloweOrigins)) {
+    http_response_code(403);
+    echo "<h3>{$origin}</h3>";
+    echo '<h2>You shall not pass!</h2><h1>🧙🏻‍♂️</h1>';
+    exit();
+}
+
+header('Content-Type: application/json');
 
 $router = [
-    '/jap' => ['httpCrud', 'jap_words'],
+    '/jap' => ['crud', 'jap_words'],
     '/jap_session' => 'japSession'
 ];
 
@@ -29,8 +35,8 @@ try {
         exit();
     }
 
-    if($controller[0] === 'httpCrud') {
-        call_user_func(...$controller);
+    if($controller[0] === 'crud') {
+        httpCrud($controller[1]);
     } else {
         usePDO($controller);
     }

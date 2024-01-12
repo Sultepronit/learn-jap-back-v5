@@ -5,7 +5,7 @@ function usePDO(callable $action, array $args = []) {
     require_once '../env.php';
     try {
         $pdo = new PDO(
-            "mysql:host={$env['DB_HOST']};dbname={$env['DB_DATABASE']}",
+            "mysql:host={$env['DB_HOST']};dbname={$env['DB_NAME']}",
             $env['DB_USER'],
             $env['DB_PASS']
         );

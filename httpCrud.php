@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once 'renumberAfterDelete.php';
 require_once 'addNextRepeatStatus.php';
 
-function httpCrud($table) {
+function httpCrud(string $table) {
     function receiveInput() {
         $json = file_get_contents('php://input');
         return json_decode($json, true);
