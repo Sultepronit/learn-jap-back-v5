@@ -8,8 +8,9 @@ require_once '../allowedOrigins.php';
 require_once 'usePDO.php';
 require_once 'httpCrud.php';
 require_once 'japSession.php';
+require_once 'kanjiSession.php';
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$origin = $_SERVER['HTTP_ORIGIN'] ?? 'test';
 if(!in_array($origin, $alloweOrigins)) {
     http_response_code(403);
     echo "<h3>{$origin}</h3>";
@@ -21,7 +22,9 @@ header('Content-Type: application/json');
 
 $router = [
     '/jap' => ['crud', 'jap_words'],
-    '/jap_session' => 'japSession'
+    '/kanji' => ['crud', 'collected_kanji'],
+    '/jap_session' => 'japSession',
+    '/kanji_session' => 'kanjiSession'
 ];
 
 try {
