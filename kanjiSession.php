@@ -6,13 +6,13 @@ declare(strict_types=1);
 
 function kanjiSession(PDO $pdo) {
     # session consts and vars
-    // $query = 'SELECT * FROM jap_words_const_vars;';
-    // $stmt = $pdo->query($query);
-    // $constsAndVars = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-    $constsAndVars = [
-        'sessionLength' => 60,
-        'reRepeatStatus' => 15000
-    ];
+    $query = 'SELECT * FROM collected_kanji_consts_vars;';
+    $stmt = $pdo->query($query);
+    $constsAndVars = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    // $constsAndVars = [
+    //     'sessionLength' => 60,
+    //     'reRepeatStatus' => 15000
+    // ];
 
     # repeat list
     $query = "SELECT * FROM collected_kanji

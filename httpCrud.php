@@ -34,9 +34,10 @@ function httpCrud(string $table) {
         $id = $_GET['id'] ?? null;
         $input = receiveInput();
         
-        if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
-            $input['learnStatus'] = addNextRepeatStatus($pdo, $table);
-        }
+        // if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
+        //     $input['learnStatus'] = addNextRepeatStatus($pdo, $table);
+        // }
+        $input = addNextRepeatStatus($input, $pdo, $table);
 
         $columns = array_keys($input);
         $values = array_values($input);

@@ -1,17 +1,24 @@
 <?php
 
-function addNextRepeatStatus(PDO $pdo, string $table) {
-    if($table === 'jap_words') {
-        $query = "SELECT value FROM jap_words_const_vars
-            WHERE name = 'nextRepeatStatus';";
-        $newStatus = $pdo->query($query)->fetchColumn() + 1;
-        // print_r($newStatus);
+function updateTheStatus(PDO $pdo, string $table) {
+    $query = "SELECT value FROM {$table}_consts_vars
+        WHERE name = 'nextRepeatStatus';";
+    $newStatus = $pdo->query($query)->fetchColumn() + 1;
 
-        $query = "UPDATE jap_words_const_vars
-            SET value = {$newStatus}
-            WHERE name = 'nextRepeatStatus'";
-        $pdo->exec($query);
+    $query = "UPDATE {$table}_consts_vars
+        SET value = {$newStatus}
+        WHERE name = 'nextRepeatStatus'";
+    $pdo->exec($query);
 
-        return $newStatus;
+    return $newStatus;
+}
+
+function addNextRepeatStatus(array $input, PDO $pdo, string $table) {
+    if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
+        $input['learnStatus'] = updateTheStatus($pdo, $table);
+    } else if(isset($input['repeatStatus']) && $input['repeatStatus'] == 33) {
+        $input['repeatStatus'] = updateTheStatus($pdo, $table);
     }
+
+    return $input;
 }

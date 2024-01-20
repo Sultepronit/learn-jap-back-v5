@@ -8,7 +8,7 @@ function updateReRepeatStatus(PDO $pdo, array $constsAndVars, int $repeatListLen
     }
     $newStatus = $constsAndVars['reRepeatStatus'] + ($dif * 2);
 
-    $query = "UPDATE jap_words_const_vars
+    $query = "UPDATE jap_words_consts_vars
         SET value = {$newStatus}
         WHERE name = 'reRepeatStatus'";
     $pdo->exec($query);
