@@ -2,18 +2,18 @@
 declare(strict_types=1);
 
 // require_once 'updateReRepeatStatus.php';
-function updateReRepeatStatus(PDO $pdo, array $constsAndVars, int $repeatListLength) {
-    $dif = $constsAndVars['numberToRepeat'] - $repeatListLength;
-    if($dif < 1) {
-        return;
-    }
-    $newStatus = $constsAndVars['reRepeatStatus'] + ($dif * 2);
+// function updateReRepeatStatus(PDO $pdo, array $constsAndVars, int $repeatListLength) {
+//     $dif = $constsAndVars['numberToRepeat'] - $repeatListLength;
+//     if($dif < 1) {
+//         return;
+//     }
+//     $newStatus = $constsAndVars['reRepeatStatus'] + ($dif * 2);
 
-    $query = "UPDATE jap_words_consts_vars
-        SET value = {$newStatus}
-        WHERE name = 'reRepeatStatus'";
-    $pdo->exec($query);
-}
+//     $query = "UPDATE jap_words_consts_vars
+//         SET value = {$newStatus}
+//         WHERE name = 'reRepeatStatus'";
+//     $pdo->exec($query);
+// }
 
 function japSession(PDO $pdo) {
     # session consts and vars
@@ -37,7 +37,7 @@ function japSession(PDO $pdo) {
         AND fProgress >= 0 AND bProgress >= 0;";
     $stmt = $pdo->query($query);
     $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    updateReRepeatStatus($pdo, $constsAndVars, count($repeatList));
+    updateReRepeatStatus($pdo, 'jap_words', $constsAndVars, count($repeatList));
 
     # repeat-problem list
     $query = "SELECT * FROM jap_words

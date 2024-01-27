@@ -7,11 +7,12 @@ header('Access-Control-Allow-Origin: *');
 require_once '../allowedOrigins.php';
 require_once 'usePDO.php';
 require_once 'httpCrud.php';
+require_once 'updateReRepeatStatus.php';
 require_once 'japSession.php';
 require_once 'kanjiSession.php';
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? 'test';
-if(!in_array($origin, $alloweOrigins)) {
+$origin = $_SERVER['HTTP_ORIGIN']; // ?? 'test';
+if(!in_array($origin, $allowedOrigins)) {
     http_response_code(403);
     echo "<h3>{$origin}</h3>";
     echo '<h2>You shall not pass!</h2><h1>🧙🏻‍♂️</h1>';
