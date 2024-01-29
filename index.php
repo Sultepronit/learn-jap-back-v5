@@ -10,8 +10,9 @@ require_once 'httpCrud.php';
 require_once 'updateReRepeatStatus.php';
 require_once 'japSession.php';
 require_once 'kanjiSession.php';
+require_once 'selectKanji.php';
 
-$origin = $_SERVER['HTTP_ORIGIN']; // ?? 'test';
+$origin = $_SERVER['HTTP_ORIGIN'] ?? 'test';
 if(!in_array($origin, $allowedOrigins)) {
     http_response_code(403);
     echo "<h3>{$origin}</h3>";
@@ -25,7 +26,8 @@ $router = [
     '/jap' => ['crud', 'jap_words'],
     '/kanji' => ['crud', 'collected_kanji'],
     '/jap_session' => 'japSession',
-    '/kanji_session' => 'kanjiSession'
+    '/kanji_session' => 'kanjiSession',
+    '/select_kanji' => 'selectKanji'
 ];
 
 try {
