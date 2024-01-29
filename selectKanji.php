@@ -11,6 +11,53 @@ function linksToJson($card) {
     return $card;
 }
 
+function updateLinks($pdo, $newCard, $oldCard, $links) {
+    if($newCard[$links] !==  $oldCard[$links]) {
+        // echo $links, ': ', $newCard[$links], PHP_EOL;
+        $query = "UPDATE collected_kanji
+            SET {$links} = $newCard[$links]
+            WHERE id = {$oldCard['id']};";
+        echo $query, PHP_EOL;
+        // $pdo->exec($query);
+    }
+}
+
+function updateChanges($pdo, $updatedList, $theDb) {
+    $i = 0;
+    foreach($updatedList as $newCard) {
+        $newCard = linksToJson($newCard);
+        updateLinks($pdo, $newCard, $theDb[$i], 'links');
+        updateLinks($pdo, $newCard, $theDb[$i], 'otherLinks');
+        $i++;
+    }
+}
+
+function setUnique($array, $newVal) {
+    $array[] = $newVal;
+}
+
+class Set implements IteratorAggregate
+{
+    public $data = [];
+
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator($this->data);
+    }
+
+    public function add(mixed $newEntry): void
+    {
+        if(!in_array($newEntry, $this->data)) {
+            $this->data[] = $newEntry;
+        }
+    }
+
+    public function has(mixed $item): bool
+    {
+        return in_array($item, $this->data);
+    }
+}
+
 function selectKanji(PDO $pdo) {
     # get the db
     $query = "SELECT id, kanji, links, otherLinks FROM collected_kanji;";
@@ -23,7 +70,6 @@ function selectKanji(PDO $pdo) {
     foreach($theDb as $row) {
         $updatedList[$row['kanji']] = ['links' => [], 'otherLinks' => []];
     }
-    // print_r($updatedList);
 
     # get words
     $query = "SELECT cardNumber, altWriting, writings, rareWritings
@@ -36,15 +82,17 @@ function selectKanji(PDO $pdo) {
     # fill the $updatedList
     foreach($words as $word) {
         # handle normal writings
-        $unique = [];
+        // $unique = [];
+        $unique = new Set();
         if(!$word['altWriting']) {
             foreach(mb_str_split($word['writings'], 1, 'UTF-8') as $char) {
                 if(isKanji($char)) {
-                    $unique[$char] = true;
+                    // $unique[$char] = true;
+                    $unique->add($char);
                 }
             }
 
-            foreach(array_keys($unique) as $kanji) {
+            foreach($unique as $kanji) {
                 $updatedList[$kanji]['links'][] = $word['cardNumber'];
             }
         } else {
@@ -52,15 +100,16 @@ function selectKanji(PDO $pdo) {
         }
 
         # handle additional writings
-        $other = [];
+        // $other = [];
+        $other = new Set();
         foreach(mb_str_split($word['rareWritings'], 1, 'UTF-8') as $char) {
-            if(isKanji($char) && !in_array($char, array_keys($unique))) {
-                $other[$char] = true;
+            if(isKanji($char) && !$unique->has($char)) {
+                // $other[$char] = true;
+                $other->add($char);
             }
         }
-        // print_r($other);
 
-        foreach(array_keys($other) as $kanji) {
+        foreach($other as $kanji) {
             if(in_array($kanji, array_keys($updatedList))) {
                 $updatedList[$kanji]['otherLinks'][] = $word['cardNumber'];
             }
@@ -68,30 +117,13 @@ function selectKanji(PDO $pdo) {
     }
     // print_r($updatedList);
 
-    # create lists to update existing and create new cards
+    # check for changes & save to db
  
     $theDbLength = count($theDb);
-    
+
     $newCards = array_slice($updatedList, $theDbLength);
     print_r($newCards);
 
     $updatedList = array_slice($updatedList, 0, $theDbLength);
-
-    function updateLinks($newCard, $oldCard, $links) {
-        if($newCard[$links] !==  $oldCard[$links]) {
-            // echo $links, ': ', $newCard[$links], PHP_EOL;
-            $query = "UPDATE collected_kanji
-                SET {$links} = $newCard[$links]
-                WHERE id = {$oldCard['id']};";
-            echo $query, PHP_EOL;
-        }
-    }
-
-    $i = 0;
-    foreach($updatedList as $kanji => $newCard) {
-        $newCard = linksToJson($newCard);
-        updateLinks($newCard, $theDb[$i], 'links');
-        updateLinks($newCard, $theDb[$i], 'otherLinks');
-        $i++;
-    }
+    updateChanges($pdo, $updatedList, $theDb);
 }
