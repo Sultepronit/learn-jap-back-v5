@@ -1,24 +1,60 @@
 <?php
 declare(strict_types=1);
 
-function isKanji($char) {
-    return $char > 'ー';
+require_once 'Set.php';
+
+class Changes
+{
+    private static array $cards = [
+        'updated' => [],
+        'created' => []
+    ];
+
+    public static function addUpdated(string $kanji): void
+    {
+        self::$cards['updated'][] = $kanji;
+    }
+
+    public static function addCreated(string $kanji): void
+    {
+        self::$cards['created'][] = $kanji;
+    }
+
+    public static function printResult(): void
+    {
+        echo json_encode(self::$cards);
+    }
+}
+
+function writingsToLinks($word, &$updatedList, $writings, $links) {
+    $unique = new Set();
+    foreach(mb_str_split($word[$writings], 1, 'UTF-8') as $char) {
+        if($char > 'ー') {
+            $unique->add($char);
+        }
+    }
+
+    foreach($unique as $kanji) {
+        $updatedList[$kanji][$links][] = $word['cardNumber'];
+    }
 }
 
 function linksToJson($card) {
+    $card['otherLinks'] = array_diff($card['otherLinks'], $card['links']);
     $card['links'] = json_encode($card['links']);
     $card['otherLinks'] = json_encode($card['otherLinks']);
     return $card;
 }
 
 function updateLinks($pdo, $newCard, $oldCard, $links) {
-    if($newCard[$links] !==  $oldCard[$links]) {
-        // echo $links, ': ', $newCard[$links], PHP_EOL;
+    if($newCard[$links] !== $oldCard[$links]) {
+        Changes::addUpdated($oldCard['kanji']);
+        
         $query = "UPDATE collected_kanji
-            SET {$links} = $newCard[$links]
-            WHERE id = {$oldCard['id']};";
-        echo $query, PHP_EOL;
-        // $pdo->exec($query);
+            SET {$links} = '$newCard[$links]'
+            WHERE id = {$oldCard['id']}";
+        // echo $query, PHP_EOL;
+        $pdo->exec($query);
     }
 }
 
@@ -32,30 +68,39 @@ function updateChanges($pdo, $updatedList, $theDb) {
     }
 }
 
-function setUnique($array, $newVal) {
-    $array[] = $newVal;
-}
-
-class Set implements IteratorAggregate
-{
-    public $data = [];
-
-    public function getIterator(): Traversable
-    {
-        return new ArrayIterator($this->data);
-    }
-
-    public function add(mixed $newEntry): void
-    {
-        if(!in_array($newEntry, $this->data)) {
-            $this->data[] = $newEntry;
+function createNew(PDO $pdo, array $cards, array $jooyoo) {
+    foreach($cards as $kanji => $card) {
+        if(!array_key_exists('links', $card)) {
+            continue;
         }
-    }
 
-    public function has(mixed $item): bool
-    {
-        return in_array($item, $this->data);
+        Changes::addCreated($kanji);
+
+        $card['kanji'] = $kanji;
+        $card['readings'] = $jooyoo[$kanji] ?? '';
+
+        if(!array_key_exists('otherLinks', $card)) {
+            $card['otherLinks'] = [];
+        }
+
+        $card = linksToJson($card);
+        
+        // print_r($card);
+
+        $query = "INSERT INTO collected_kanji
+            (kanji, readings, links, otherLinks)
+            VALUES (?, ?, ?, ?)";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([
+            $card['kanji'],
+            $card['readings'],
+            $card['links'],
+            $card['otherLinks']
+        ]);
+        // echo $query, PHP_EOL;
     }
+    
+    // print_r($cards);
 }
 
 function selectKanji(PDO $pdo) {
@@ -63,7 +108,6 @@ function selectKanji(PDO $pdo) {
     $query = "SELECT id, kanji, links, otherLinks FROM collected_kanji;";
     $stmt = $pdo->query($query);
     $theDb = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // print_r($theDb);
 
     # prepare the $updatedList
     $updatedList = [];
@@ -77,53 +121,31 @@ function selectKanji(PDO $pdo) {
         WHERE learnStatus >= 0";
     $stmt = $pdo->query($query);
     $words = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // print_r($words);
+    
+    # get jooyoo
+    $query = "SELECT kanji, readings FROM jooyoo";
+    $jooyoo = $pdo->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+    // print_r($jooyoo);
 
     # fill the $updatedList
     foreach($words as $word) {
-        # handle normal writings
-        // $unique = [];
-        $unique = new Set();
         if(!$word['altWriting']) {
-            foreach(mb_str_split($word['writings'], 1, 'UTF-8') as $char) {
-                if(isKanji($char)) {
-                    // $unique[$char] = true;
-                    $unique->add($char);
-                }
-            }
-
-            foreach($unique as $kanji) {
-                $updatedList[$kanji]['links'][] = $word['cardNumber'];
-            }
+            writingsToLinks($word, $updatedList, 'writings', 'links');
         } else {
             $word['rareWritings'] .= $word['writings'];
         }
 
-        # handle additional writings
-        // $other = [];
-        $other = new Set();
-        foreach(mb_str_split($word['rareWritings'], 1, 'UTF-8') as $char) {
-            if(isKanji($char) && !$unique->has($char)) {
-                // $other[$char] = true;
-                $other->add($char);
-            }
-        }
-
-        foreach($other as $kanji) {
-            if(in_array($kanji, array_keys($updatedList))) {
-                $updatedList[$kanji]['otherLinks'][] = $word['cardNumber'];
-            }
-        }
+        writingsToLinks($word, $updatedList, 'rareWritings', 'otherLinks');
     }
-    // print_r($updatedList);
 
     # check for changes & save to db
- 
     $theDbLength = count($theDb);
 
     $newCards = array_slice($updatedList, $theDbLength);
-    print_r($newCards);
+    createNew($pdo, $newCards, $jooyoo);
 
     $updatedList = array_slice($updatedList, 0, $theDbLength);
     updateChanges($pdo, $updatedList, $theDb);
+
+    Changes::printResult();
 }

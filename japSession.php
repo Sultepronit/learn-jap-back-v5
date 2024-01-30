@@ -1,20 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// require_once 'updateReRepeatStatus.php';
-// function updateReRepeatStatus(PDO $pdo, array $constsAndVars, int $repeatListLength) {
-//     $dif = $constsAndVars['numberToRepeat'] - $repeatListLength;
-//     if($dif < 1) {
-//         return;
-//     }
-//     $newStatus = $constsAndVars['reRepeatStatus'] + ($dif * 2);
-
-//     $query = "UPDATE jap_words_consts_vars
-//         SET value = {$newStatus}
-//         WHERE name = 'reRepeatStatus'";
-//     $pdo->exec($query);
-// }
-
 function japSession(PDO $pdo) {
     # session consts and vars
     $query = 'SELECT * FROM jap_words_consts_vars;';
