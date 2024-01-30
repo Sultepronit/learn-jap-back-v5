@@ -2,29 +2,7 @@
 declare(strict_types=1);
 
 require_once 'Set.php';
-
-class Changes
-{
-    private static array $cards = [
-        'updated' => [],
-        'created' => []
-    ];
-
-    public static function addUpdated(string $kanji): void
-    {
-        self::$cards['updated'][] = $kanji;
-    }
-
-    public static function addCreated(string $kanji): void
-    {
-        self::$cards['created'][] = $kanji;
-    }
-
-    public static function printResult(): void
-    {
-        echo json_encode(self::$cards);
-    }
-}
+require_once 'Changes.php';
 
 function writingsToLinks($word, &$updatedList, $writings, $links) {
     $unique = new Set();
@@ -53,7 +31,6 @@ function updateLinks($pdo, $newCard, $oldCard, $links) {
         $query = "UPDATE collected_kanji
             SET {$links} = '$newCard[$links]'
             WHERE id = {$oldCard['id']}";
-        // echo $query, PHP_EOL;
         $pdo->exec($query);
     }
 }
@@ -84,8 +61,6 @@ function createNew(PDO $pdo, array $cards, array $jooyoo) {
         }
 
         $card = linksToJson($card);
-        
-        // print_r($card);
 
         $query = "INSERT INTO collected_kanji
             (kanji, readings, links, otherLinks)
@@ -97,10 +72,7 @@ function createNew(PDO $pdo, array $cards, array $jooyoo) {
             $card['links'],
             $card['otherLinks']
         ]);
-        // echo $query, PHP_EOL;
     }
-    
-    // print_r($cards);
 }
 
 function selectKanji(PDO $pdo) {
