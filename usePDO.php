@@ -2,13 +2,8 @@
 declare(strict_types=1);
 
 function usePDO(callable $action, array $args = []) {
-    require_once '../env.php';
     try {
-        $pdo = new PDO(
-            "mysql:host={$env['DB_HOST']};dbname={$env['DB_NAME']}",
-            $env['DB_USER'],
-            $env['DB_PASS']
-        );
+        $pdo = new PDO('sqlite:' . __DIR__ . '/jap.sqlite');
 
         call_user_func_array($action, [$pdo, ...$args]);  
     } catch (\Throwable $th) {

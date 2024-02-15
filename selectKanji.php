@@ -18,7 +18,9 @@ function writingsToLinks($word, &$updatedList, $writings, $links) {
 }
 
 function linksToJson($card) {
-    $card['otherLinks'] = array_diff($card['otherLinks'], $card['links']);
+    $filtered = array_diff($card['otherLinks'], $card['links']);
+    $card['otherLinks'] = array_values($filtered); // for old php!
+
     $card['links'] = json_encode($card['links']);
     $card['otherLinks'] = json_encode($card['otherLinks']);
     return $card;

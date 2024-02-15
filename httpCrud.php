@@ -30,6 +30,10 @@ function httpCrud(string $table) {
         echo json_encode($newCard);
     }
 
+    // function options() {
+    //     echo 'Here we go!';
+    // }
+
     function patch(PDO $pdo, string $table) {
         $id = $_GET['id'] ?? null;
         $input = receiveInput();
@@ -80,7 +84,9 @@ function httpCrud(string $table) {
         }
     }
 
-    $method = $_GET['real-method']
-        ?? strtolower($_SERVER['REQUEST_METHOD']);
+    // $method = $_GET['real-method']
+    //     ?? strtolower($_SERVER['REQUEST_METHOD']);
+    $method = strtolower($_SERVER['REQUEST_METHOD']);
+    // echo $method;
     usePDO($method, [$table]);
 }
