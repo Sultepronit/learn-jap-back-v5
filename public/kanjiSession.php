@@ -10,17 +10,24 @@ function kanjiSession(PDO $pdo) {
     # repeat list
     $query = "SELECT * FROM collected_kanji
         WHERE repeatStatus < {$constsAndVars['reRepeatStatus']}
-        AND progress > -1;";
+        AND repeatStatus > 0;";
+        // AND progress > -1;";
     $stmt = $pdo->query($query);
     $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     updateReRepeatStatus($pdo, 'collected_kanji', $constsAndVars, count($repeatList));
 
-    # repeat-problem list
+    # learn list
     $query = "SELECT * FROM collected_kanji
-    WHERE repeatStatus < {$constsAndVars['reRepeatStatus']}
-    AND progress < 0;";
+    WHERE repeatStatus < 1;";
     $stmt = $pdo->query($query);
-    $problemList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $learnList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // # repeat-problem list
+    // $query = "SELECT * FROM collected_kanji
+    // WHERE repeatStatus < {$constsAndVars['reRepeatStatus']}
+    // AND progress < 0;";
+    // $stmt = $pdo->query($query);
+    // $problemList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     # words
     $query = "SELECT altWriting, writings, rareWritings, readings, rareReadings, translation
@@ -32,7 +39,8 @@ function kanjiSession(PDO $pdo) {
     echo json_encode([
         'sessionLength' => $constsAndVars['sessionLength'],
         'repeatList' => $repeatList,
-        'problemList' => $problemList,
+        // 'problemList' => $problemList,
+        'learnList' => $learnList,
         'words' => $words
     ]);
 }
