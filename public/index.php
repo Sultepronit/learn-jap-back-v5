@@ -18,6 +18,7 @@ require_once 'httpCrud.php';
 require_once 'updateReRepeatStatus.php';
 require_once 'japSession.php';
 require_once 'kanjiSession.php';
+require_once 'wordsForKanji.php';
 require_once 'selectKanji.php';
 
 // $origin = $_SERVER['HTTP_ORIGIN'];
@@ -36,6 +37,7 @@ $router = [
     'kanji' => ['crud', 'collected_kanji'],
     'jap_session' => 'japSession',
     'kanji_session' => 'kanjiSession',
+    'words_for_kanji' => 'wordsForKanji',
     'select_kanji' => 'selectKanji'
 ];
 

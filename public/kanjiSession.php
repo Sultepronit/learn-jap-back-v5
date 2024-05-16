@@ -41,6 +41,6 @@ function kanjiSession(PDO $pdo) {
         'repeatList' => $repeatList,
         // 'problemList' => $problemList,
         'learnList' => $learnList,
-        'words' => $words
+        // 'words' => $words
     ]);
 }
