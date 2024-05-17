@@ -8,58 +8,9 @@ if($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// echo '<pre>';
-// print_r($_SERVER);
-// exit();
+require_once './app/App.php';
 
-// require_once '../../allowedOrigins.php';
-require_once 'usePDO.php';
-require_once 'httpCrud.php';
-require_once 'updateReRepeatStatus.php';
-require_once 'japSession.php';
-require_once 'kanjiSession.php';
-require_once 'wordsForKanji.php';
-require_once 'selectKanji.php';
+$app = new App();
 
-// $origin = $_SERVER['HTTP_ORIGIN'];
-// $origin = $_SERVER['HTTP_ORIGIN'] ?? 'test';
-// if(!in_array($origin, $allowedOrigins)) {
-//     http_response_code(403);
-//     echo "<h3>{$origin}</h3>";
-//     echo '<h2>You shall not pass!</h2><h1>🧙🏻‍♂️</h1>';
-//     exit();
-// }
+$app->run();
 
-header('Content-Type: application/json');
-
-$router = [
-    'jap' => ['crud', 'jap_words'],
-    'kanji' => ['crud', 'collected_kanji'],
-    'jap_session' => 'japSession',
-    'kanji_session' => 'kanjiSession',
-    'words_for_kanji' => 'wordsForKanji',
-    'select_kanji' => 'selectKanji'
-];
-
-try {
-    $ru = $_SERVER['REQUEST_URI'] ?? '';
-    $target = explode('/', $ru)[2] ?? '';
-    $path = explode('?', $target)[0];
-    
-    $controller = $router[$path] ?? null;
-
-    if(!$controller) {
-        http_response_code(404);
-        echo 'Wrong path!';
-        exit();
-    }
-
-    if($controller[0] === 'crud') {
-        httpCrud($controller[1]);
-    } else {
-        usePDO($controller);
-    }
-} catch (\Throwable $th) {
-    http_response_code(500);
-    print_r($th);
-} 
