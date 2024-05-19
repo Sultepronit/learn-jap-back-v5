@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/controllers/TableController.php';
 require_once __DIR__ . '/controllers/SessionController.php';
+require_once 'controllers/session.php';
 
 class Router
 {
@@ -34,7 +35,8 @@ class Router
             case 'table':
                 return TableController::handle($request['details'], $pdo);
             case 'session':
-                return SessionController::prepare($request['details'][0], $pdo);
+                // return SessionController::prepare($request['details'][0], $pdo);
+                return session($request['details'][0], $pdo);
             default:
                 http_response_code(404);
                 echo '<h2>You shall not pass!</h2><h1>🧙🏻‍♂️</h1>';
