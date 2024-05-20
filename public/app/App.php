@@ -8,7 +8,7 @@ class App
     public function run()
     {
         try {
-            $pdo = new PDO('sqlite:' . __DIR__ . '/../db/db.sqlite');
+            $pdo = new PDO('sqlite:' . __DIR__ . '/../db.sqlite');
 
             $response = Router::run($pdo); 
 

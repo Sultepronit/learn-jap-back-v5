@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/controllers/TableController.php';
-require_once __DIR__ . '/controllers/SessionController.php';
 require_once 'controllers/session.php';
 
 class Router
@@ -33,7 +32,8 @@ class Router
 
         switch ($request['subject']) {
             case 'table':
-                return TableController::handle($request['details'], $pdo);
+                // return TableController::handle($request['details'], $pdo);
+                return (new TableController($request['details'], $pdo))->handle();
             case 'session':
                 // return SessionController::prepare($request['details'][0], $pdo);
                 return session($request['details'][0], $pdo);
