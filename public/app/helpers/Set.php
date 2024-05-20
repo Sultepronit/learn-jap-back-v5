@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-class Set implements IteratorAggregate
+class Set implements IteratorAggregate, JsonSerializable
 {
     public $data = [];
 
@@ -20,5 +20,10 @@ class Set implements IteratorAggregate
     public function has(mixed $item): bool
     {
         return in_array($item, $this->data);
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this->data;
     }
 }

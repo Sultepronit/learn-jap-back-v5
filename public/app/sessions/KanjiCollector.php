@@ -5,32 +5,31 @@ require_once __DIR__ . '/../helpers/Set.php';
 
 class KanjiCollector
 {
+    private static PDO $pdo;
+
     private static array $oldList = [];
     private static array $words = [];
     private static array $jooyoo = [];
 
     private static array $kanjiMap = [];
-    private static array $newList = [];
-
-    private static int $oldListLength = 0;
 
     private static array $changes = [
-        'updated' => [],
+        'updated' => null,
         'created' => []
     ];
 
-    private static function getTheLists($pdo): void
+    private static function getTheLists(): void
     {
         $query = "SELECT id, kanji, links, otherLinks FROM collected_kanji;";
-        self::$oldList = $pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+        self::$oldList = self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
         $query = "SELECT cardNumber, altWriting, writings, rareWritings
             FROM jap_words
             WHERE learnStatus >= 0";
-        self::$words = $pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+        self::$words = self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
         $query = "SELECT kanji, readings FROM jooyoo";
-        self::$jooyoo = $pdo->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+        self::$jooyoo = self::$pdo->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
     private static function prepareKanjiMap(): void
@@ -86,20 +85,6 @@ class KanjiCollector
         return $result;
     }
 
-    private static function fillNewList(): void
-    {
-        foreach(self::$kanjiMap as $kanji => $card) {
-            $processedCard = self::processCard($card);
-
-            if($processedCard) {
-                self::$newList[] = [
-                    'kanji' => $kanji,
-                    ...$processedCard
-                ];
-            }
-        }
-    }
-
     private static function processKanjiMap(): void
     {
         $filtered = [];
@@ -115,65 +100,83 @@ class KanjiCollector
         self::$kanjiMap = $filtered;
     }
 
-    // function updateLinks($pdo, $newCard, $oldCard, $links) {
-    //     if($newCard[$links] !== $oldCard[$links]) {
-    //         Changes::addUpdated($oldCard['kanji']);
-            
-    //         $query = "UPDATE collected_kanji
-    //             SET {$links} = '$newCard[$links]'
-    //             WHERE id = {$oldCard['id']}";
-    //         $pdo->exec($query);
-    //     }
-    // }
+    private static function updateLinks(int $id, array $newCard, string $linksType) {
+        $query = "UPDATE collected_kanji
+            SET {$linksType} = '$newCard[$linksType]'
+            WHERE id = {$id}";
+        echo $query, '<br>';
+        // $pdo->exec($query);
+    }
 
     private static function saveChanges(): void
     {
-        $linkTypes = ['links', 'otherLinks'];
-        foreach(self::$oldList as $oldCard) {
-            foreach($linkTypes as $linkType) {
-                $kanji = $oldCard['kanji'];
-                if($oldCard[$linkType] !== self::$kanjiMap[$kanji][$linkType]) {
-                    self::$changes['updated'][] = $kanji;
+        self::$changes['updated'] = new Set();
 
-                    echo $oldCard[$linkType], ' -> ', self::$kanjiMap[$kanji][$linkType];
-                    // echo 'something!';
+        $linksTypes = ['links', 'otherLinks'];
+        foreach($linksTypes as $linksType) {
+            foreach(self::$oldList as $oldCard) {
+                $kanji = $oldCard['kanji'];
+                if($oldCard[$linksType] !== self::$kanjiMap[$kanji][$linksType]) {
+                    self::$changes['updated']->add($kanji);
+
+                    // echo $oldCard[$linksType], ' -> ', self::$kanjiMap[$kanji][$linksType], '<br>';
+                    self::updateLinks($oldCard['id'], self::$kanjiMap[$kanji], $linksType);
                 }
             }
         }
-        // for($i = 0; $i < self::$oldListLength; $i++) {
-        //     if(self::$oldList[$i]['kanji'] !== self::$newList[$i]['kanji']) {
-        //         echo 'Something crazy have happend!';
-        //     }
+    }
 
-        //     foreach($linkTypes as $linkType) {
-        //         if(self::$oldList[$i][$linkType] !== self::$newList[$i][$linkType]) {
-        //             self::$changes['updated'][] = self::$oldList[$i]['kanji'];
+    private static function insertCard(array $card): void
+    {
+        $query = "INSERT INTO collected_kanji
+                (kanji, readings, links, otherLinks)
+                VALUES (?, ?, ?, ?)";
+            $stmt = self::$pdo->prepare($query);
 
-        //             // echo 'something!';
-        //             echo self::$oldList[$i]['kanji'], ' ', $linkType, ': ';
-        //             echo self::$oldList[$i][$linkType], ' -> ', self::$newList[$i][$linkType], '<br>';
-
-        //         }
-        //     }
-        // }
+            print_r($stmt);
+            // $stmt->execute([
+            //     $card['kanji'],
+            //     $card['readings'],
+            //     $card['links'],
+            //     $card['otherLinks']
+            // ]);
     }
     
+    private static function createNew(): void
+    {
+        $newCards = array_slice(self::$kanjiMap, count(self::$oldList));
+        print_r($newCards);
+
+        foreach($newCards as $kanji => $card) {
+            echo 'Here we are?<br>';
+            self::$changes['created'][] = $kanji;
+
+            $card['kanji'] = $kanji;
+            $card['readings'] = self::$jooyoo[$kanji] ?? '';
+
+            self::insertCard($card);
+        }
+    }
+
     public static function collect(PDO $pdo)
     {
-        // echo 'here we go!';
-        self::getTheLists($pdo);
-        self::$oldListLength = count(self::$oldList);
+        self::$pdo = $pdo;
+
+        self::getTheLists();
         self::prepareKanjiMap();
         self::fillKanjiMap();
         self::processKanjiMap();
-        // self::fillNewList();
         self::saveChanges();
+        self::createNew();
 
         echo '<pre>';
         // print_r(self::$words);
         // print_r(self::$kanjiMap);
         // print_r(self::$newList);
         print_r(self::$changes);
-        echo 'Happy End!';
+        echo json_encode(self::$changes);
+        // echo 'Happy End!';
+
+        // return self::$changes;
     }
 }
