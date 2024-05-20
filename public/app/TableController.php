@@ -1,17 +1,21 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/helpers/renumberAfterDelete.php';
+
 class TableController
 {
-    // private array $request = [];
     private string $table = '';
     private int $id = 0;
     private PDO $pdo;
 
     public function __construct(array $request, PDO $pdo)
     {
-        $this->table = $request[0];
-        $this->id = (int) $request[1] ?? 0;
+        $tempAliases = [
+            'words' => 'jap_words'
+        ];
+        $this->table = $tempAliases[$request[0]];
+        $this->id = isset($request[1]) ? (int) $request[1] : 0;
         $this->pdo = $pdo;
     }
     
@@ -41,7 +45,7 @@ class TableController
         return $newCard;
     }
 
-    function patch() {
+    private function patch() {
         $input = self::receiveInput();
         
         // $input = addNextRepeatStatus($input, $pdo, $table);
@@ -63,6 +67,26 @@ class TableController
         # check results
         return json_encode($input) == json_encode($updated) ?
             ['success' => true] : ['input' => $input, 'result' => $updated];
+    }
+
+    private function delete() {
+        try {
+            $this->pdo->beginTransaction();
+
+            $this->pdo->exec("DELETE FROM {$this->table} WHERE id = {$this->id}");
+            renumberAfterDelete($this->pdo, $this->table);
+
+            $this->pdo->commit();
+
+            return ['success' => true];
+        } catch (\Throwable $e) {
+            if($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            http_response_code(500);
+            print_r($e);
+            // exit();
+        }
     }
 
     public function handle() {

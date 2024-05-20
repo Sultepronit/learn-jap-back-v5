@@ -32,10 +32,8 @@ class Router
 
         switch ($request['subject']) {
             case 'table':
-                // return TableController::handle($request['details'], $pdo);
                 return (new TableController($request['details'], $pdo))->handle();
             case 'session':
-                // return SessionController::prepare($request['details'][0], $pdo);
                 return session($request['details'][0], $pdo);
             default:
                 http_response_code(404);

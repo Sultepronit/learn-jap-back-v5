@@ -1,16 +1,14 @@
 <?php
 declare(strict_types=1);
 
+require_once './app/run.php';
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: *');
 
-if(!key_exists('REQUEST_METHOD', $_SERVER) || $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_once './app/App.php';
-
-$app = new App();
-
-$app->run();
+run();
 
