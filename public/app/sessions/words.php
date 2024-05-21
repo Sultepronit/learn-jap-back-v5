@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-function japSession(PDO $pdo) {
+function words($pdo): array
+{
     # session consts and vars
     $query = 'SELECT * FROM jap_words_consts_vars;';
     $stmt = $pdo->query($query);
@@ -25,13 +26,6 @@ function japSession(PDO $pdo) {
     $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     updateReRepeatStatus($pdo, 'jap_words', $constsAndVars, count($repeatList));
 
-    # repeat-problem list
-    // $query = "SELECT * FROM jap_words
-    //     WHERE learnStatus BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}
-    //     AND (fProgress < 0 OR bProgress < 0);";
-    // $stmt = $pdo->query($query);
-    // $problemList = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
     # recognize list
     $query = "SELECT * FROM jap_words
         WHERE learnStatus > {$constsAndVars['reRepeatStatus']}
@@ -39,12 +33,11 @@ function japSession(PDO $pdo) {
     $stmt = $pdo->query($query);
     $recognizeList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode([
+    return [
         'constsAndVars' => $constsAndVars,
         'learnList' => $learnList,
         'confirmList' => $confirmList,
         'repeatList' => $repeatList,
-        // 'problemList' => $problemList,
         'recognizeList' => $recognizeList
-    ]);
+    ];
 }
