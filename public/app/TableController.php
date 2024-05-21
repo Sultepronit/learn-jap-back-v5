@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/helpers/renumberAfterDelete.php';
+require_once 'helpers/renumberAfterDelete.php';
+require_once 'helpers/addNextRepeatStatus.php';
 
 class TableController
 {
@@ -12,7 +13,8 @@ class TableController
     public function __construct(array $request, PDO $pdo)
     {
         $tempAliases = [
-            'words' => 'jap_words'
+            'words' => 'jap_words',
+            'kanji' => 'collected_kanji'
         ];
         $this->table = $tempAliases[$request[0]];
         $this->id = isset($request[1]) ? (int) $request[1] : 0;
@@ -48,7 +50,7 @@ class TableController
     private function patch() {
         $input = self::receiveInput();
         
-        // $input = addNextRepeatStatus($input, $pdo, $table);
+        $input = addNextRepeatStatus($input, $this->pdo, $this->table);
 
         $columns = array_keys($input);
         $values = [...array_values($input), $this->id];

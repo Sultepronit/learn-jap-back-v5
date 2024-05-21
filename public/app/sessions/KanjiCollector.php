@@ -76,11 +76,15 @@ class KanjiCollector
             return null;
         }
 
+        if(!isset($card['otherLinks'])) {
+            $card['otherLinks'] = [];
+        }
+
         $filtered = array_diff($card['otherLinks'], $card['links']);
         $card['otherLinks'] = array_values($filtered);
     
         $result['links'] = json_encode($card['links']);
-        $result['otherLinks'] = json_encode($card['otherLinks'] ?? []);
+        $result['otherLinks'] = json_encode($card['otherLinks']);
 
         return $result;
     }
@@ -104,8 +108,7 @@ class KanjiCollector
         $query = "UPDATE collected_kanji
             SET {$linksType} = '$newCard[$linksType]'
             WHERE id = {$id}";
-        echo $query, '<br>';
-        // $pdo->exec($query);
+        self::$pdo->exec($query);
     }
 
     private static function saveChanges(): void
@@ -119,7 +122,6 @@ class KanjiCollector
                 if($oldCard[$linksType] !== self::$kanjiMap[$kanji][$linksType]) {
                     self::$changes['updated']->add($kanji);
 
-                    // echo $oldCard[$linksType], ' -> ', self::$kanjiMap[$kanji][$linksType], '<br>';
                     self::updateLinks($oldCard['id'], self::$kanjiMap[$kanji], $linksType);
                 }
             }
@@ -132,23 +134,19 @@ class KanjiCollector
                 (kanji, readings, links, otherLinks)
                 VALUES (?, ?, ?, ?)";
             $stmt = self::$pdo->prepare($query);
-
-            print_r($stmt);
-            // $stmt->execute([
-            //     $card['kanji'],
-            //     $card['readings'],
-            //     $card['links'],
-            //     $card['otherLinks']
-            // ]);
+            $stmt->execute([
+                $card['kanji'],
+                $card['readings'],
+                $card['links'],
+                $card['otherLinks']
+            ]);
     }
     
     private static function createNew(): void
     {
         $newCards = array_slice(self::$kanjiMap, count(self::$oldList));
-        print_r($newCards);
 
         foreach($newCards as $kanji => $card) {
-            echo 'Here we are?<br>';
             self::$changes['created'][] = $kanji;
 
             $card['kanji'] = $kanji;
@@ -169,14 +167,6 @@ class KanjiCollector
         self::saveChanges();
         self::createNew();
 
-        echo '<pre>';
-        // print_r(self::$words);
-        // print_r(self::$kanjiMap);
-        // print_r(self::$newList);
-        print_r(self::$changes);
-        echo json_encode(self::$changes);
-        // echo 'Happy End!';
-
-        // return self::$changes;
+        return self::$changes;
     }
 }
