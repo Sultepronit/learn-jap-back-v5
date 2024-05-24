@@ -25,6 +25,9 @@ function direct(PDO $pdo): ?array
     $request = parseRequest();
 
     switch ($request['subject']) {
+        case 'init':
+            return ['success' => true];
+
         case 'table':
             return (new TableController($request['details'], $pdo))->handle();
 

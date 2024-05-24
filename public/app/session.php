@@ -5,6 +5,7 @@ require_once 'helpers/updateReRepeatStatus.php';
 require_once 'sessions/words.php';
 require_once 'sessions/kanji.php';
 require_once 'sessions/wordsForKanji.php';
+require_once 'sessions/kanjiForWords.php';
 require_once 'sessions/KanjiCollector.php';
 
 function session(string $sessionName, PDO $pdo)
@@ -18,6 +19,9 @@ function session(string $sessionName, PDO $pdo)
 
         case 'words-for-kanji':
             return wordsForKanji($pdo);
+
+        case 'kanji-for-words':
+            return kanjiForWords($pdo);
 
         case 'collect-kanji':
             return KanjiCollector::collect($pdo);
