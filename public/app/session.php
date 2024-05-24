@@ -7,6 +7,7 @@ require_once 'sessions/kanji.php';
 require_once 'sessions/wordsForKanji.php';
 require_once 'sessions/kanjiForWords.php';
 require_once 'sessions/KanjiCollector.php';
+require_once 'sessions/wordsMin.php';
 
 function session(string $sessionName, PDO $pdo)
 {    
@@ -25,6 +26,9 @@ function session(string $sessionName, PDO $pdo)
 
         case 'collect-kanji':
             return KanjiCollector::collect($pdo);
+
+        case 'words-min':
+            return wordsMin($pdo);
             
         default:
             return ['404' => 'Nothing here!'];
