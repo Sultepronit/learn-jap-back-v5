@@ -33,7 +33,7 @@ function wordsMin(PDO $pdo)
     $learnList = $data['learnList'];
     assignLearnStage($learnList, 'LEARN');
 
-    $confirmNumber = (int) count($data['confirmList']) / $confirmDivisor;
+    $confirmNumber = (int) (count($data['confirmList']) / $confirmDivisor);
     shuffle($data['confirmList']);
     $confirmList = array_slice($data['confirmList'], 0, $confirmNumber);
     assignLearnStage($confirmList, 'CONFIRM');
