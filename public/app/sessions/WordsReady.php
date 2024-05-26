@@ -69,7 +69,7 @@ class WordsReady
     {
         self::$data = words($pdo);
 
-        $sessionLength = self::$data['constsAndVars']['sessionLength'];
+        // $sessionLength = self::$data['constsAndVars']['sessionLength'];
 
         $learnList = self::prepareLearnList();
         $learnNumber = count($learnList);
@@ -80,16 +80,17 @@ class WordsReady
         $recognizeNumber = (int) ceil(count(self::$data['recognizeList']) / self::$recognizeDivisor);
         $recognizeList = self::getPartOfList('recognizeList', $recognizeNumber, 'RECOGNIZE');
 
-        $contents = [...$learnList, ...$confirmList, ...$recognizeList];
+        $session = [...$learnList, ...$confirmList, ...$recognizeList];
 
-        $repeatNumber = $sessionLength - count($contents);
+        // $repeatNumber = $sessionLength - count($session);
+        $repeatNumber = self::$data['constsAndVars']['sessionLength'] - count($session);
         $repeatList = self::prepareRepeatList($repeatNumber);
 
-        $contents = [...$contents, ...$repeatList];
-        shuffle($contents);
+        $session = [...$session, ...$repeatList];
+        shuffle($session);
 
-        $plan = compact('sessionLength', 'learnNumber', 'confirmNumber', 'recognizeNumber', 'repeatNumber');
+        $plan = compact('learnNumber', 'confirmNumber', 'recognizeNumber', 'repeatNumber');
         
-        return compact('plan', 'contents');
+        return compact('plan', 'session');
     }
 }
