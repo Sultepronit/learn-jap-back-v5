@@ -1,6 +1,6 @@
 <?php
 
-function updateTheStatus(PDO $pdo, string $table) {
+function updateNextRepeatStatus(PDO $pdo, string $table) {
     $query = "SELECT value FROM {$table}_consts_vars
         WHERE name = 'nextRepeatStatus';";
     $newStatus = $pdo->query($query)->fetchColumn() + 1;
@@ -15,9 +15,9 @@ function updateTheStatus(PDO $pdo, string $table) {
 
 function addNextRepeatStatus(array $input, PDO $pdo, string $table) {
     if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
-        $input['learnStatus'] = updateTheStatus($pdo, $table);
+        $input['learnStatus'] = updateNextRepeatStatus($pdo, $table);
     } else if(isset($input['repeatStatus']) && $input['repeatStatus'] == 33) {
-        $input['repeatStatus'] = updateTheStatus($pdo, $table);
+        $input['repeatStatus'] = updateNextRepeatStatus($pdo, $table);
     }
 
     return $input;
