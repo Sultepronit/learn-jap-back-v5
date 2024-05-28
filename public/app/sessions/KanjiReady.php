@@ -30,14 +30,13 @@ class KanjiReady
     private static function autorepeat(array $card)
     {
         self::$autorepeated++;
-        // // print_r($card);
-        // $newStatus = 0;
+
         $newStatus = updateNextRepeatStatus(self::$pdo, 'collected_kanji');
 
         $query = "UPDATE collected_kanji
         SET repeatStatus = {$newStatus}, autorepeat = 0
         WHERE id = {$card['id']}";
-        // echo PHP_EOL . $query;
+
         self::$pdo->exec($query);
     }
 

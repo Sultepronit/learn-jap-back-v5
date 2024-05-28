@@ -21,7 +21,6 @@ function words($pdo): array
     # repeat list
     $query = "SELECT * FROM jap_words
         WHERE learnStatus BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}";
-        //AND fProgress >= 0 AND bProgress >= 0;";
     $stmt = $pdo->query($query);
     $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     updateReRepeatStatus($pdo, 'jap_words', $constsAndVars, count($repeatList));
@@ -29,7 +28,7 @@ function words($pdo): array
     # recognize list
     $query = "SELECT * FROM jap_words
         WHERE learnStatus > {$constsAndVars['reRepeatStatus']}
-        AND fStats < 1";
+        AND fStats < 0";
     $stmt = $pdo->query($query);
     $recognizeList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
