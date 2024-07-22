@@ -8,14 +8,14 @@ class WordsReady
     private static $data = [];
 
     private static $confirmDivisor = 4;
-    private static $recognizeDivisor = 5;
+    // private static $recognizeDivisor = 5;
 
     private static $learnStages = [
         'LEARN' => 'learn',
         'CONFIRM' => 'confirm',
         'REPEAT' => 'repeat',
         'AUTOREPEAT' => 'autorepeat',
-        'RECOGNIZE' => 'recognize',
+        // 'RECOGNIZE' => 'recognize',
     ];
 
     private static function assignLearnStage(array &$list, string $stageLabel): void
@@ -75,10 +75,10 @@ class WordsReady
         $confirmNumber = (int) ceil(count(self::$data['confirmList']) / self::$confirmDivisor);
         $confirmList = self::getPartOfList('confirmList', $confirmNumber, 'CONFIRM');
 
-        $recognizeNumber = (int) ceil(count(self::$data['recognizeList']) / self::$recognizeDivisor);
-        $recognizeList = self::getPartOfList('recognizeList', $recognizeNumber, 'RECOGNIZE');
+        // $recognizeNumber = (int) ceil(count(self::$data['recognizeList']) / self::$recognizeDivisor);
+        // $recognizeList = self::getPartOfList('recognizeList', $recognizeNumber, 'RECOGNIZE');
 
-        $session = [...$learnList, ...$confirmList, ...$recognizeList];
+        $session = [...$learnList, ...$confirmList];
 
         $repeatNumber = self::$data['constsAndVars']['sessionLength'] - count($session);
         $repeatList = self::prepareRepeatList($repeatNumber);
@@ -86,7 +86,7 @@ class WordsReady
         $session = [...$session, ...$repeatList];
         shuffle($session);
 
-        $plan = compact('learnNumber', 'confirmNumber', 'recognizeNumber', 'repeatNumber');
+        $plan = compact('learnNumber', 'confirmNumber', 'repeatNumber');
         
         return compact('plan', 'session');
     }

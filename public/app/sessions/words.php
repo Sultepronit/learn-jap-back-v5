@@ -26,17 +26,16 @@ function words($pdo): array
     updateReRepeatStatus($pdo, 'jap_words', $constsAndVars, count($repeatList));
 
     # recognize list
-    $query = "SELECT * FROM jap_words
-        WHERE learnStatus > {$constsAndVars['reRepeatStatus']}
-        AND fStats < 0";
-    $stmt = $pdo->query($query);
-    $recognizeList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // $query = "SELECT * FROM jap_words
+    //     WHERE learnStatus > {$constsAndVars['reRepeatStatus']}
+    //     AND fStats < 0";
+    // $stmt = $pdo->query($query);
+    // $recognizeList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     return [
         'constsAndVars' => $constsAndVars,
         'learnList' => $learnList,
         'confirmList' => $confirmList,
-        'repeatList' => $repeatList,
-        'recognizeList' => $recognizeList
+        'repeatList' => $repeatList
     ];
 }
