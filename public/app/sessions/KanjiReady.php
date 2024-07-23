@@ -31,10 +31,10 @@ class KanjiReady
     {
         self::$autorepeated++;
 
-        $newStatus = updateNextRepeatStatus(self::$pdo, 'collected_kanji');
+        $newStatus = updateNextRepeatStatus(self::$pdo, 'kanji');
 
-        $query = "UPDATE collected_kanji
-        SET repeatStatus = {$newStatus}, autorepeat = 0
+        $query = "UPDATE kanji
+        SET repeat_status = {$newStatus}, autorepeat = 0
         WHERE id = {$card['id']}";
 
         self::$pdo->exec($query);
@@ -78,6 +78,7 @@ class KanjiReady
         $repeatList = self::prepareRepeatList($repeatNumber);
 
         $session = [...$learnList, ...$repeatList];
+        $session = tableToCamelCase($session);
         shuffle($session);
 
         $autorepeated = self::$autorepeated;

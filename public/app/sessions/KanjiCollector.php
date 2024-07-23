@@ -20,11 +20,11 @@ class KanjiCollector
 
     private static function getTheLists(): void
     {
-        $query = "SELECT id, kanji, links, otherLinks FROM collected_kanji;";
+        $query = "SELECT id, kanji, links, other_links FROM kanji;";
         self::$oldList = self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
         $query = "SELECT cardNumber, altWriting, writings, rareWritings
-            FROM jap_words
+            FROM words
             WHERE learnStatus >= 0";
         self::$words = self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -35,7 +35,7 @@ class KanjiCollector
     private static function prepareKanjiMap(): void
     {
         foreach(self::$oldList as $row) {
-            self::$kanjiMap[$row['kanji']] = ['links' => [], 'otherLinks' => []];
+            self::$kanjiMap[$row['kanji']] = ['links' => [], 'other_links' => []];
         }
     }
 
@@ -65,7 +65,7 @@ class KanjiCollector
             }
             
             if($rareWritings) {
-                self::writingsToLinks($word, $rareWritings, 'otherLinks');
+                self::writingsToLinks($word, $rareWritings, 'other_links');
             }
         }
     }
@@ -76,15 +76,15 @@ class KanjiCollector
             return null;
         }
 
-        if(!isset($card['otherLinks'])) {
-            $card['otherLinks'] = [];
+        if(!isset($card['other_links'])) {
+            $card['other_links'] = [];
         }
 
-        $filtered = array_diff($card['otherLinks'], $card['links']);
-        $card['otherLinks'] = array_values($filtered);
+        $filtered = array_diff($card['other_links'], $card['links']);
+        $card['other_links'] = array_values($filtered);
     
         $result['links'] = json_encode($card['links']);
-        $result['otherLinks'] = json_encode($card['otherLinks']);
+        $result['other_links'] = json_encode($card['other_links']);
 
         return $result;
     }
@@ -105,7 +105,7 @@ class KanjiCollector
     }
 
     private static function updateLinks(int $id, array $newCard, string $linksType) {
-        $query = "UPDATE collected_kanji
+        $query = "UPDATE kanji
             SET {$linksType} = '$newCard[$linksType]'
             WHERE id = {$id}";
         self::$pdo->exec($query);
@@ -115,7 +115,7 @@ class KanjiCollector
     {
         self::$changes['updated'] = new Set();
 
-        $linksTypes = ['links', 'otherLinks'];
+        $linksTypes = ['links', 'other_links'];
         foreach($linksTypes as $linksType) {
             foreach(self::$oldList as $oldCard) {
                 $kanji = $oldCard['kanji'];
@@ -130,15 +130,15 @@ class KanjiCollector
 
     private static function insertCard(array $card): void
     {
-        $query = "INSERT INTO collected_kanji
-                (kanji, readings, links, otherLinks)
+        $query = "INSERT INTO kanji
+                (kanji, readings, links, other_links)
                 VALUES (?, ?, ?, ?)";
             $stmt = self::$pdo->prepare($query);
             $stmt->execute([
                 $card['kanji'],
                 $card['readings'],
                 $card['links'],
-                $card['otherLinks']
+                $card['other_links']
             ]);
     }
     

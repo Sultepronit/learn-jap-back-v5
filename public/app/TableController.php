@@ -12,11 +12,7 @@ class TableController
 
     public function __construct(array $request, PDO $pdo)
     {
-        $tempAliases = [
-            'words' => 'jap_words',
-            'kanji' => 'collected_kanji'
-        ];
-        $this->table = $tempAliases[$request[0]];
+        $this->table = $request[0];
         $this->id = isset($request[1]) ? (int) $request[1] : 0;
         $this->pdo = $pdo;
     }
@@ -33,18 +29,7 @@ class TableController
             ->fetchAll(PDO::FETCH_ASSOC);
         
         return $data;
-    }
-
-    private function post() {
-        $cn = self::receiveInput()['cardNumber'];
-        $this->pdo->exec("INSERT INTO {$this->table} (cardNumber) VALUES ({$cn})");
-
-        $id = (int) $this->pdo->lastInsertId();
-        $newCard = $this->pdo
-            ->query("SELECT * FROM {$this->table} WHERE id = {$id}")
-            ->fetch(PDO::FETCH_ASSOC);
-
-        return $newCard;
+        // return tableToCamelCase($data);
     }
 
     private function patch() {
@@ -71,6 +56,7 @@ class TableController
             ['success' => true] : ['input' => $input, 'result' => $updated];
     }
 
+    # words only
     private function delete() {
         try {
             $this->pdo->beginTransaction();
