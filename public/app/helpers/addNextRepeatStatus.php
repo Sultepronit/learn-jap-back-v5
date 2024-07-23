@@ -14,9 +14,7 @@ function updateNextRepeatStatus(PDO $pdo, string $table) {
 }
 
 function addNextRepeatStatus(array $input, PDO $pdo, string $table) {
-    if(isset($input['learnStatus']) && $input['learnStatus'] == 33) {
-        $input['learnStatus'] = updateNextRepeatStatus($pdo, $table);
-    } else if(isset($input['repeatStatus']) && $input['repeatStatus'] == 33) {
+    if(isset($input['repeatStatus']) && $input['repeatStatus'] == 33) {
         $input['repeatStatus'] = updateNextRepeatStatus($pdo, $table);
     }
 

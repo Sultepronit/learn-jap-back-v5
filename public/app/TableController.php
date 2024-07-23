@@ -28,8 +28,8 @@ class TableController
             ->query("SELECT * FROM {$this->table}")
             ->fetchAll(PDO::FETCH_ASSOC);
         
-        return $data;
-        // return tableToCamelCase($data);
+        // return $data;
+        return tableToCamelCase($data);
     }
 
     private function patch() {

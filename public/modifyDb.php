@@ -30,19 +30,17 @@ function camelColumn_to_snake($table, $camelTerm) {
 // camelColumn_to_snake('kanji', 'repeatStatus');
 // camelColumn_to_snake('kanji', 'otherLinks');
 
-// camelToSnake('sessionLength');
+// camelColumn_to_snake('words', 'cardNumber');
+// renameColumn('words', 'learnStatus', 'repeat_status');
+// camelColumn_to_snake('words', 'fProgress');
+// camelColumn_to_snake('words', 'bProgress');
+// renameColumn('words', 'fStats', 'f_record');
+// renameColumn('words', 'bStats', 'b_record');
+// camelColumn_to_snake('words', 'fAutorepeat');
+// camelColumn_to_snake('words', 'bAutorepeat');
+camelColumn_to_snake('words', 'altWriting');
+camelColumn_to_snake('words', 'rareWritings');
+camelColumn_to_snake('words', 'rareReadings');
 
-// echo PHP_EOL;
-
-function snakeToCamel(string $snake_term) {
-    return lcfirst(
-        str_replace(' ', '',
-            ucwords(str_replace('_', ' ', $snake_term))
-        )
-    );
-}
-
-// echo snakeToCamel('session_length');
-// echo snakeToCamel('session');
 
 echo PHP_EOL;

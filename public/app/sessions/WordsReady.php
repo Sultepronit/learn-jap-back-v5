@@ -8,27 +8,25 @@ class WordsReady
     private static $data = [];
 
     private static $confirmDivisor = 4;
-    // private static $recognizeDivisor = 5;
 
-    private static $learnStages = [
+    private static $repeatStages = [
         'LEARN' => 'learn',
         'CONFIRM' => 'confirm',
         'REPEAT' => 'repeat',
         'AUTOREPEAT' => 'autorepeat',
-        // 'RECOGNIZE' => 'recognize',
     ];
 
-    private static function assignLearnStage(array &$list, string $stageLabel): void
+    private static function assignRepeatStage(array &$list, string $stageLabel): void
     {
         foreach($list as &$card) {
-            $card['learnStage'] = self::$learnStages[$stageLabel];
+            $card['repeatStage'] = self::$repeatStages[$stageLabel];
         }
     }
 
     private static function prepareLearnList(): array
     {
         $learnList = self::$data['learnList'];
-        self::assignLearnStage($learnList, 'LEARN');
+        self::assignRepeatStage($learnList, 'LEARN');
         return $learnList;
     }
 
@@ -36,7 +34,7 @@ class WordsReady
     {
         shuffle(self::$data[$listName]);
         $result = array_slice(self::$data[$listName], 0, $length);
-        self::assignLearnStage($result, $stageLabel);
+        self::assignRepeatStage($result, $stageLabel);
 
         return $result;
     }
@@ -49,12 +47,12 @@ class WordsReady
         $normal = 0;
         foreach(self::$data['repeatList'] as $card) {
             if(
-                $card['fProgress'] === 0 && $card['fAutorepeat']
-                || $card['fProgress'] > 0 && $card['bAutorepeat']
+                $card['f_progress'] === 0 && $card['f_autorepeat']
+                || $card['f_progress'] > 0 && $card['b_autorepeat']
             ) {
-                $card['learnStage'] = self::$learnStages['AUTOREPEAT'];
+                $card['repeatStage'] = self::$repeatStages['AUTOREPEAT'];
             } else {
-                $card['learnStage'] = self::$learnStages['REPEAT'];
+                $card['repeatStage'] = self::$repeatStages['REPEAT'];
                 $normal++;
             }
 
@@ -75,15 +73,13 @@ class WordsReady
         $confirmNumber = (int) ceil(count(self::$data['confirmList']) / self::$confirmDivisor);
         $confirmList = self::getPartOfList('confirmList', $confirmNumber, 'CONFIRM');
 
-        // $recognizeNumber = (int) ceil(count(self::$data['recognizeList']) / self::$recognizeDivisor);
-        // $recognizeList = self::getPartOfList('recognizeList', $recognizeNumber, 'RECOGNIZE');
-
         $session = [...$learnList, ...$confirmList];
 
         $repeatNumber = self::$data['constsAndVars']['sessionLength'] - count($session);
         $repeatList = self::prepareRepeatList($repeatNumber);
 
         $session = [...$session, ...$repeatList];
+        $session = tableToCamelCase($session);
         shuffle($session);
 
         $plan = compact('learnNumber', 'confirmNumber', 'repeatNumber');
