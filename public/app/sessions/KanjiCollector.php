@@ -23,9 +23,9 @@ class KanjiCollector
         $query = "SELECT id, kanji, links, other_links FROM kanji;";
         self::$oldList = self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
-        $query = "SELECT cardNumber, altWriting, writings, rareWritings
+        $query = "SELECT card_number, alt_writing, writings, rare_writings
             FROM words
-            WHERE learnStatus >= 0";
+            WHERE repeat_status >= 0";
         self::$words = self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
         $query = "SELECT kanji, readings FROM jooyoo";
@@ -49,16 +49,16 @@ class KanjiCollector
         }
     
         foreach($unique as $kanji) {
-            self::$kanjiMap[$kanji][$linksType][] = $word['cardNumber'];
+            self::$kanjiMap[$kanji][$linksType][] = $word['card_number'];
         }
     }
 
     private static function fillKanjiMap(): void
     {
         foreach(self::$words as $word) {
-            $rareWritings = $word['rareWritings'];
+            $rareWritings = $word['rare_writings'];
 
-            if(!$word['altWriting']) {
+            if(!$word['alt_writing']) {
                 self::writingsToLinks($word, $word['writings'], 'links');
             } else {
                 $rareWritings .= $word['writings'];

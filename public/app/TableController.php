@@ -37,6 +37,9 @@ class TableController
         
         $input = addNextRepeatStatus($input, $this->pdo, $this->table);
 
+        $input = changeRowTitles($input, 'snake');
+
+        // $columns = changeRowTitles(array_keys($input), 'snake');
         $columns = array_keys($input);
         $values = [...array_values($input), $this->id];
 
@@ -54,6 +57,19 @@ class TableController
         # check results
         return json_encode($input) == json_encode($updated) ?
             ['success' => true] : ['input' => $input, 'result' => $updated];
+    }
+
+    # words only
+    private function post() {
+        $cn = self::receiveInput()['cardNumber'];
+        $this->pdo->exec("INSERT INTO {$this->table} (card_number) VALUES ({$cn})");
+
+        $id = (int) $this->pdo->lastInsertId();
+        $newCard = $this->pdo
+            ->query("SELECT * FROM {$this->table} WHERE id = {$id}")
+            ->fetch(PDO::FETCH_ASSOC);
+
+        return changeRowTitles($newCard, 'camel');
     }
 
     # words only
