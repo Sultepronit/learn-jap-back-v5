@@ -35,6 +35,7 @@ class TableController
         return $data;
     }
 
+    # words only
     private function post() {
         $cn = self::receiveInput()['cardNumber'];
         $this->pdo->exec("INSERT INTO {$this->table} (cardNumber) VALUES ({$cn})");
@@ -71,6 +72,7 @@ class TableController
             ['success' => true] : ['input' => $input, 'result' => $updated];
     }
 
+    # words only
     private function delete() {
         try {
             $this->pdo->beginTransaction();
