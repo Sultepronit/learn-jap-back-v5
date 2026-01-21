@@ -14,13 +14,13 @@ function words($pdo): array
     $learnList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     # confirm list
-    $query = 'SELECT * FROM words WHERE repeat_status = 1;';
-    $stmt = $pdo->query($query);
-    $confirmList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // $query = 'SELECT * FROM words WHERE repeat_status = 1;';
+    // $stmt = $pdo->query($query);
+    // $confirmList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     # repeat list
     $query = "SELECT * FROM words
-        WHERE repeat_status BETWEEN 2 AND {$constsAndVars['reRepeatStatus']}";
+        WHERE repeat_status BETWEEN 1 AND {$constsAndVars['reRepeatStatus']}";
     $stmt = $pdo->query($query);
     $repeatList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     updateReRepeatStatus($pdo, 'words', $constsAndVars, count($repeatList));
@@ -28,7 +28,7 @@ function words($pdo): array
     return [
         'constsAndVars' => $constsAndVars,
         'learnList' => $learnList,
-        'confirmList' => $confirmList,
+        // 'confirmList' => $confirmList,
         'repeatList' => $repeatList
     ];
 }

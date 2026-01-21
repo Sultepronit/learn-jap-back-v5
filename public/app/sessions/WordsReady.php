@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once 'words.php';
+require_once 'forgottenWords.php';
 
 class WordsReady
 {
@@ -65,24 +66,29 @@ class WordsReady
 
     public static function prepare(PDO $pdo): array
     {
+        returnForgottenWord($pdo);
+
         self::$data = words($pdo);
 
         $learnList = self::prepareLearnList();
         $learnNumber = count($learnList);
 
-        $confirmNumber = (int) ceil(count(self::$data['confirmList']) / self::$confirmDivisor);
-        $confirmList = self::getPartOfList('confirmList', $confirmNumber, 'CONFIRM');
+        // $confirmNumber = (int) ceil(count(self::$data['confirmList']) / self::$confirmDivisor);
+        // $confirmList = self::getPartOfList('confirmList', $confirmNumber, 'CONFIRM');
 
-        $session = [...$learnList, ...$confirmList];
+        // $session = [...$learnList, ...$confirmList];
 
-        $repeatNumber = self::$data['constsAndVars']['sessionLength'] - count($session);
+        // $repeatNumber = self::$data['constsAndVars']['sessionLength'] - count($session);
+        $repeatNumber = self::$data['constsAndVars']['sessionLength'] - count($learnList);
         $repeatList = self::prepareRepeatList($repeatNumber);
 
-        $session = [...$session, ...$repeatList];
+        // $session = [...$session, ...$repeatList];
+        $session = [...$learnList, ...$repeatList];
         $session = tableToCamelCase($session);
         shuffle($session);
 
-        $plan = compact('learnNumber', 'confirmNumber', 'repeatNumber');
+        // $plan = compact('learnNumber', 'confirmNumber', 'repeatNumber');
+        $plan = compact('learnNumber', 'repeatNumber');
         
         return compact('plan', 'session');
     }
