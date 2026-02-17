@@ -8,7 +8,7 @@ class WordsReady
 {
     private static $data = [];
 
-    private static $confirmDivisor = 4;
+    // private static $confirmDivisor = 4;
 
     private static $repeatStages = [
         'LEARN' => 'learn',
@@ -31,14 +31,14 @@ class WordsReady
         return $learnList;
     }
 
-    private static function getPartOfList(string $listName, int $length, string $stageLabel): array
-    {
-        shuffle(self::$data[$listName]);
-        $result = array_slice(self::$data[$listName], 0, $length);
-        self::assignRepeatStage($result, $stageLabel);
+    // private static function getPartOfList(string $listName, int $length, string $stageLabel): array
+    // {
+    //     shuffle(self::$data[$listName]);
+    //     $result = array_slice(self::$data[$listName], 0, $length);
+    //     self::assignRepeatStage($result, $stageLabel);
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
     private static function prepareRepeatList(int $repeatNumber): array
     {
