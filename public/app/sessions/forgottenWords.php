@@ -10,11 +10,11 @@ function returnForgottenWord(PDO $pdo) {
     
     for ($i = 0; $i < $len / 20; $i++) {
         $index = random_int(0, $len + 10);
-        echo $index . PHP_EOL;
+        // echo $index . PHP_EOL;
         if ($index >= $len) continue;
 
         $id = $list[$index];
-        echo $id . PHP_EOL;
+        // echo $id . PHP_EOL;
         
         $query = "UPDATE words SET repeat_status = 0 WHERE id = ?";
         $stmt = $pdo->prepare($query);

@@ -9,7 +9,7 @@ function words($pdo): array
     $constsAndVars = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
     # learn list
-    $query = 'SELECT * FROM words WHERE repeat_status = 0;';
+    $query = 'SELECT * FROM words WHERE repeat_status = 0 LIMIT 40;';
     $stmt = $pdo->query($query);
     $learnList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
